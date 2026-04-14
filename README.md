@@ -1,4 +1,11 @@
 # choose-your-own-adventure
+The URL for the deployed web site
+https://alarisp.github.io/choose-your-own-adventure/reader.html
+
+The URL for the Github Repository
+https://github.com/AlarisP/choose-your-own-adventure
+
+Names: Alaris, 
 
 ## Build Story Graph
 
