@@ -5,7 +5,7 @@ https://alarisp.github.io/choose-your-own-adventure/reader.html
 The URL for the Github Repository
 https://github.com/AlarisP/choose-your-own-adventure
 
-Names: Alaris, Ryan Locquiao
+Names: Alaris, Ryan Locquiao, Max Olshanskyy
 
 A web-based Choose Your Own Adventure reader and authoring tool built around *The Cave of Time*.
 
