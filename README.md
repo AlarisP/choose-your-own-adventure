@@ -1,5 +1,28 @@
 # choose-your-own-adventure
 
+A web-based Choose Your Own Adventure reader and authoring tool built around *The Cave of Time*.
+
+## Running the Story Reader Locally
+
+Start a local server from inside the project folder:
+
+```bash
+cd choose-your-own-adventure
+python -m http.server 8000
+```
+
+Then open your browser and go to:
+
+```
+http://localhost:8000/reader.html
+```
+
+Stop the server with `Ctrl + C`.
+
+> **Note:** The reader must be served over HTTP — opening `reader.html` directly as a file will not work because the browser blocks local file fetches.
+
+---
+
 ## Build Story Graph
 
 Run:
