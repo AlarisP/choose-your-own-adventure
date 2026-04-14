@@ -17,3 +17,9 @@ AI'IIEilTUNE@"
 7:02 
 yes clean the file
 
+7:33
+read through this project. tell me what tasks need to be done. I am working on this as a group assignment and need clear work distinctions
+
+7:35
+Which role should I do
+

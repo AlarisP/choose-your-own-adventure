@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CYOA Story Reader</title>
+  <link rel="stylesheet" href="reader.css" />
+</head>
+<body>
+  <div id="app">
+    <audio id="bg-audio" src="media/Medieval%20Traveler's%20Journey%20_%20Medieval%20Music%20for%20Relaxation%20%26%20Adventure.mp3" loop></audio>
+
+    <header>
+      <div id="header-top">
+        <a id="home-link" href="index.html">← Back to Authoring Tool</a>
+        <div id="audio-controls">
+          <span id="audio-hint">♪ Music plays on first click</span>
+          <button id="audio-toggle" onclick="toggleAudio()" title="Toggle music">♪ Music: ON</button>
+        </div>
+      </div>
+      <h1>CYOA Story Reader</h1>
+      <div id="story-title">The Cave of Time</div>
+      <div id="page-indicator">Page <span id="page-num">2</span></div>
+    </header>
+
+    <main>
+      <div id="story-text"></div>
+    </main>
+
+    <footer>
+      <div id="choices"></div>
+      <div id="nav-buttons">
+        <button id="back-btn" onclick="goBack()" disabled>Back</button>
+        <button id="restart-btn" onclick="restart()">Restart</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="reader.js"></script>
+</body>
+</html>
