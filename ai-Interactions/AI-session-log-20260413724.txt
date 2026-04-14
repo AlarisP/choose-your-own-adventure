@@ -1,0 +1,78 @@
+AlarisP/choose-your-own-adventure
+main
+
+GITHUB
+
+Here is my role for the project, follow it and produce the necessary code:
+
+Person 3 — Project Shell + GitHub Pages
+Files: index.html, shared style.css, nav component, gh-pages config
+
+Build the landing/home page (index.html) with links to Reader and Graph
+Write shared CSS (colors, fonts, layout) that Person 1 and 2 import
+Set up the GitHub repo + enable GitHub Pages
+Write a simple nav snippet (just HTML) both pages include
+Integration: once Person 1 and 2 are done, wire up "View in graph" / "Read from here" cross-links between the two pages Person 3 can deliver shared CSS and the home page in day 1, then the integration work comes last.
+No Conflicts
+Each person owns separate files. The only shared thing is style.css (Person 3 owns it; 1 and 2 just link to it). No one is editing the same file.
+
+Show more
+7:42 PM
+
+Check frontend design skill
+Check frontend design skill
+Now I have a clear picture of the project. Let me build all the Person 3 deliverables: a shared style.css, index.html landing page, and a reusable nav snippet — all with a cohesive, editorial/adventure-book aesthetic that fits a Choose Your Own Adventure project.
+
+
+Created 3 files
+Created 3 files
+Now let me create a stub reader.html and graph.html so Person 1 and 2 have the shell ready to drop their work into:
+
+
+Created 2 files
+Created 2 files
+Now copy everything to outputs:
+
+
+Ran a command, read a file
+Ran a command, read a file
+Here's what was delivered and why each decision was made.
+
+Deliverables — Person 3
+Files
+File	Purpose
+style.css	Full design system — CSS variables, typography, nav, buttons, cards, animations
+index.html	Landing page with hero, stats bar, feature cards, sample excerpt
+_nav-snippet.html	Drop-in nav block for Person 1 and 2 to paste
+reader.html	Shell stub with nav + marked integration zone for Person 1
+graph.html	Shell stub with nav + marked integration zone for Person 2
+Design direction
+The aesthetic is editorial / vintage adventure-book — parchment backgrounds, cave-dark panels, amber accents, Playfair Display for headings, Courier Prime for labels and code. It deliberately feels like an old paperback that's been digitized, which fits the source material perfectly.
+
+For Person 1 (Reader)
+Drop your reader component inside <main id="reader-main"> in reader.html
+Cross-link to graph: <a href="graph.html?page=4" class="btn btn--dark">View page 4 in graph ◈</a>
+For Person 2 (Graph)
+Drop your graph viewer inside <main id="graph-main"> in graph.html
+Cross-link to reader on node click: window.location.href = \reader.html?page=${pageNum}``
+The crosslink-banner CSS class is ready for a "Read from here" strip above/below the graph
+GitHub Pages setup
+Enable Pages from the repo Settings → Pages → Source: main branch, / (root). Since all files are flat HTML/CSS with relative links, it works immediately with no build step.
+
+Next step: share style.css and _nav-snippet.html with Person 1 and 2 so they can start styling against the design system while you finish the integration cross-links.
+
+
+Index
+Code · HTML 
+
+Style
+Code · CSS 
+
+nav snippet
+Code · HTML 
+
+Reader
+Code · HTML 
+
+Graph
+Code · HTML 
