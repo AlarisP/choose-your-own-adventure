@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Graph — Cave of Time</title>
+  <meta name="description" content="Explore the Cave of Time story graph with an interactive visualizer." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-header {
+      padding: var(--space-8) 0 var(--space-6);
+      text-align: center;
+    }
+
+    .page-header p {
+      max-width: 34rem;
+      margin: 0 auto;
+      color: var(--ink-muted);
+      font-size: 1rem;
+      line-height: 1.9;
+    }
+
+    .graph-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      justify-content: center;
+      margin-bottom: var(--space-5);
+    }
+
+    .graph-toolbar button,
+    .graph-toolbar a {
+      appearance: none;
+      border: 1px solid var(--cave);
+      background: var(--parchment);
+      color: var(--cave);
+      border-radius: var(--radius-sm);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono);
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform var(--t-fast), background var(--t-fast), color var(--t-fast);
+      text-decoration: none;
+    }
+
+    .graph-toolbar button:hover,
+    .graph-toolbar a:hover {
+      background: var(--amber);
+      color: var(--cave);
+      transform: translateY(-1px);
+    }
+
+    #graph-viewer {
+      background: #fff;
+      border: 2px solid var(--cave);
+      border-radius: var(--radius-lg);
+      overflow: auto;
+      box-shadow: var(--shadow-md);
+      min-height: 72vh;
+      padding: var(--space-4);
+    }
+
+    #graph-viewer svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 100%;
+    }
+
+    .graph-note {
+      margin-top: var(--space-4);
+      text-align: center;
+      color: var(--ink-muted);
+      font-size: .95rem;
+    }
+
+    @media (max-width: 720px) {
+      .graph-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Site navigation">
+    <div class="container">
+      <a class="nav-brand" href="index.html">
+        Cave of Time
+        <span>Choose Your Own Adventure</span>
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="reader.html">Read</a></li>
+        <li><a href="graph.html" aria-current="page">Story Graph</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container container--narrow">
+    <section class="page-header">
+      <h1>Story Graph</h1>
+      <p>Explore the full branching structure of The Cave of Time. The graph below is rendered from the story data and makes it easy to follow every choice and outcome.</p>
+    </section>
+
+    <div class="graph-toolbar">
+      <button id="zoom-out">Zoom Out</button>
+      <button id="reset-view">Reset View</button>
+      <button id="zoom-in">Zoom In</button>
+      <a href="output/cot-story-graph.svg" target="_blank" rel="noopener noreferrer">Open SVG</a>
+    </div>
+
+    <div id="graph-viewer" aria-live="polite">
+      <p>Loading story graph…</p>
+    </div>
+
+    <p class="graph-note">Use the buttons above to zoom the graph. Scroll to pan once it has loaded.</p>
+  </main>
+
+  <script>
+    const viewer = document.getElementById('graph-viewer');
+    const zoomInButton = document.getElementById('zoom-in');
+    const zoomOutButton = document.getElementById('zoom-out');
+    const resetButton = document.getElementById('reset-view');
+
+    let zoomLevel = 1;
+    const zoomStep = 0.15;
+    const minZoom = 0.4;
+    const maxZoom = 2.5;
+
+    function setZoom(level) {
+      zoomLevel = Math.min(maxZoom, Math.max(minZoom, level));
+      const svg = viewer.querySelector('svg');
+      if (svg) {
+        svg.style.transformOrigin = 'top left';
+        svg.style.transform = `scale(${zoomLevel})`;
+      }
+    }
+
+    function loadGraph() {
+      fetch('output/cot-story-graph.svg')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Graph file not found');
+          }
+          return response.text();
+        })
+        .then(svgText => {
+          viewer.innerHTML = svgText;
+          const svg = viewer.querySelector('svg');
+          if (svg) {
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            svg.style.width = '100%';
+            svg.style.height = 'auto';
+            setZoom(1);
+          }
+        })
+        .catch(() => {
+          viewer.innerHTML = '<p class="error">Unable to load the story graph. Check that <code>output/cot-story-graph.svg</code> exists.</p>';
+        });
+    }
+
+    zoomInButton.addEventListener('click', () => setZoom(zoomLevel + zoomStep));
+    zoomOutButton.addEventListener('click', () => setZoom(zoomLevel - zoomStep));
+    resetButton.addEventListener('click', () => setZoom(1));
+
+    loadGraph();
+  </script>
+</body>
+</html>
