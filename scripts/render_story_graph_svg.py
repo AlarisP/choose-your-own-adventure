@@ -18,13 +18,13 @@ from typing import Dict, Iterable, List, Set, Tuple
 NODE_RE = re.compile(r'^\s*P(\d+)\["(\d+)"\]\s*$')
 EDGE_RE = re.compile(r'^\s*P(\d+)\s*-->\s*P(\d+)\s*$')
 
-NODE_W = 68
-NODE_H = 30
-LAYER_GAP = 132
-ROW_GAP = 42
+NODE_W = 72
+NODE_H = 40
+LAYER_GAP = 146
+ROW_GAP = 52
 MARGIN_X = 40
 MARGIN_Y = 40
-FONT_SIZE = 12
+FONT_SIZE = 11
 
 DEFAULT_NODE_FILL = "#e2e8f0"
 DEFAULT_NODE_STROKE = "#475569"
@@ -216,6 +216,7 @@ def render_svg(nodes: List[int], edges: Dict[int, List[int]]) -> str:
     positions, width, height = compute_positions(nodes, edges)
     terminal_nodes = find_terminal_nodes(nodes, edges)
     main_trunk_nodes, main_trunk_edges = find_main_trunk(nodes, edges, start=2)
+    predecessors = build_predecessors(nodes, edges)
 
     lines: List[str] = []
     lines.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">')
@@ -243,26 +244,47 @@ def render_svg(nodes: List[int], edges: Dict[int, List[int]]) -> str:
             stroke = MAIN_TRUNK_EDGE_STROKE if is_trunk else DEFAULT_EDGE_STROKE
             stroke_width = "2.6" if is_trunk else "1.4"
             opacity = "0.95" if is_trunk else "0.85"
-            lines.append(f'<path d="{path}" fill="none" stroke="{stroke}" stroke-width="{stroke_width}" opacity="{opacity}" marker-end="url(#arrow)" />')
+            lines.append(f'<path d="{path}" fill="none" stroke="{stroke}" stroke-width="{stroke_width}" opacity="{opacity}" marker-end="url(#arrow)" class="edge" data-src="{src}" data-dst="{dst}" title="Page {src} → Page {dst}" />')
 
     for node in nodes:
         x, y = positions[node]
-        label = html.escape(str(node))
+        incoming = len(predecessors.get(node, []))
+        outgoing = len(edges.get(node, []))
+        page_label = html.escape(str(node))
+
         if node in main_trunk_nodes:
             fill = MAIN_TRUNK_NODE_FILL
             stroke = MAIN_TRUNK_NODE_STROKE
             stroke_width = "2"
+            node_class = "node node-main"
+            subtitle = "main path"
         elif node in terminal_nodes:
             fill = TERMINAL_NODE_FILL
             stroke = TERMINAL_NODE_STROKE
             stroke_width = "1.6"
+            node_class = "node node-terminal"
+            subtitle = "ending"
         else:
             fill = DEFAULT_NODE_FILL
             stroke = DEFAULT_NODE_STROKE
             stroke_width = "1.2"
+            node_class = "node node-branch"
+            subtitle = f"{outgoing} choice{'s' if outgoing != 1 else ''}"
 
+        title_text = f"Page {page_label} — {subtitle}, {incoming} incoming, {outgoing} outgoing"
+        desc_text = f"Story node for page {page_label}. {incoming} incoming edges and {outgoing} outgoing edges."
+
+        lines.append(f'<g id="node-{page_label}" class="{node_class}" data-page="{page_label}" data-incoming="{incoming}" data-outgoing="{outgoing}">')
+        lines.append(f'<title>{html.escape(title_text)}</title>')
+        lines.append(f'<desc>{html.escape(desc_text)}</desc>')
         lines.append(f'<rect x="{x}" y="{y}" rx="8" ry="8" width="{NODE_W}" height="{NODE_H}" fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}" />')
-        lines.append(f'<text x="{x + NODE_W / 2}" y="{y + NODE_H / 2 + 4}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="{FONT_SIZE}" fill="#0f172a">{label}</text>')
+        lines.append(
+            f'<text x="{x + NODE_W / 2}" y="{y + NODE_H / 2 - 4}" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="{FONT_SIZE}" fill="#0f172a">'
+            f'<tspan x="{x + NODE_W / 2}" dy="0">Page {page_label}</tspan>'
+            f'<tspan x="{x + NODE_W / 2}" dy="1.3em">{html.escape(subtitle)}</tspan>'
+            '</text>'
+        )
+        lines.append('</g>')
 
     lines.append('</svg>')
     return '\n'.join(lines) + '\n'

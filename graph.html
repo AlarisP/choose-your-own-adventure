@@ -55,17 +55,33 @@
       background: #fff;
       border: 2px solid var(--cave);
       border-radius: var(--radius-lg);
-      overflow: auto;
+      overflow: hidden;
       box-shadow: var(--shadow-md);
-      min-height: 72vh;
+      min-height: 80vh;
+      width: 100%;
+      max-width: none;
       padding: var(--space-4);
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
 
     #graph-viewer svg {
-      width: 100%;
+      width: auto;
       height: auto;
       display: block;
-      max-height: 100%;
+      max-height: none;
+      shape-rendering: geometricPrecision;
+      text-rendering: optimizeLegibility;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
 
     .graph-note {
@@ -98,7 +114,7 @@
     </div>
   </nav>
 
-  <main class="container container--narrow">
+  <main class="container">
     <section class="page-header">
       <h1>Story Graph</h1>
       <p>Explore the full branching structure of The Cave of Time. The graph below is rendered from the story data and makes it easy to follow every choice and outcome.</p>
@@ -115,7 +131,7 @@
       <p>Loading story graph…</p>
     </div>
 
-    <p class="graph-note">Use the buttons above to zoom the graph. Scroll to pan once it has loaded.</p>
+    <p class="graph-note">Use the buttons above to zoom the graph. Scroll wheel zoom and click-drag panning are supported.</p>
   </main>
 
   <script>
@@ -129,13 +145,90 @@
     const minZoom = 0.4;
     const maxZoom = 2.5;
 
-    function setZoom(level) {
-      zoomLevel = Math.min(maxZoom, Math.max(minZoom, level));
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let panStartX = 0;
+    let panStartY = 0;
+    let svgWidth = 0;
+    let svgHeight = 0;
+
+    function updateTransform() {
       const svg = viewer.querySelector('svg');
-      if (svg) {
-        svg.style.transformOrigin = 'top left';
-        svg.style.transform = `scale(${zoomLevel})`;
+      if (!svg) return;
+      svg.style.transform = `translate(${panX}px, ${panY}px)`;
+    }
+
+    function updateSvgSize() {
+      const svg = viewer.querySelector('svg');
+      if (!svg) return;
+      svg.style.width = `${svgWidth * zoomLevel}px`;
+      svg.style.height = `${svgHeight * zoomLevel}px`;
+    }
+
+    function setZoom(level, centerX = null, centerY = null) {
+      const svg = viewer.querySelector('svg');
+      if (!svg) return;
+      const prevZoom = zoomLevel;
+      zoomLevel = Math.min(maxZoom, Math.max(minZoom, level));
+      if (centerX !== null && prevZoom !== zoomLevel) {
+        const rect = svg.getBoundingClientRect();
+        const offsetX = centerX - rect.left;
+        const offsetY = centerY - rect.top;
+        panX -= (zoomLevel / prevZoom - 1) * offsetX;
+        panY -= (zoomLevel / prevZoom - 1) * offsetY;
       }
+      updateSvgSize();
+      updateTransform();
+    }
+
+    function resetView() {
+      panX = 0;
+      panY = 0;
+      zoomLevel = 1;
+      updateSvgSize();
+      updateTransform();
+    }
+
+    function handleWheel(event) {
+      const svg = viewer.querySelector('svg');
+      if (!svg) return;
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -zoomStep : zoomStep;
+      setZoom(zoomLevel + delta, event.clientX, event.clientY);
+    }
+
+    function handlePointerDown(event) {
+      const svg = viewer.querySelector('svg');
+      if (!svg) return;
+      event.preventDefault();
+      isPanning = true;
+      panStartX = event.clientX;
+      panStartY = event.clientY;
+      viewer.style.cursor = 'grabbing';
+      svg.style.cursor = 'grabbing';
+      viewer.setPointerCapture(event.pointerId);
+    }
+
+    function handlePointerMove(event) {
+      if (!isPanning) return;
+      const dx = event.clientX - panStartX;
+      const dy = event.clientY - panStartY;
+      panStartX = event.clientX;
+      panStartY = event.clientY;
+      panX += dx;
+      panY += dy;
+      const svg = viewer.querySelector('svg');
+      if (svg) updateTransform(svg);
+    }
+
+    function handlePointerUp(event) {
+      if (!isPanning) return;
+      isPanning = false;
+      viewer.style.cursor = 'grab';
+      const svg = viewer.querySelector('svg');
+      if (svg) svg.style.cursor = 'grab';
+      viewer.releasePointerCapture?.(event.pointerId);
     }
 
     function loadGraph() {
@@ -151,9 +244,11 @@
           const svg = viewer.querySelector('svg');
           if (svg) {
             svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            svg.style.width = '100%';
-            svg.style.height = 'auto';
-            setZoom(1);
+            svgWidth = svg.viewBox.baseVal.width || parseFloat(svg.getAttribute('width')) || svg.clientWidth;
+            svgHeight = svg.viewBox.baseVal.height || parseFloat(svg.getAttribute('height')) || svg.clientHeight;
+            updateSvgSize();
+            svg.style.transformOrigin = '0 0';
+            updateTransform();
           }
         })
         .catch(() => {
@@ -163,7 +258,12 @@
 
     zoomInButton.addEventListener('click', () => setZoom(zoomLevel + zoomStep));
     zoomOutButton.addEventListener('click', () => setZoom(zoomLevel - zoomStep));
-    resetButton.addEventListener('click', () => setZoom(1));
+    resetButton.addEventListener('click', resetView);
+    viewer.addEventListener('wheel', handleWheel, { passive: false });
+    viewer.addEventListener('pointerdown', handlePointerDown);
+    viewer.addEventListener('pointermove', handlePointerMove);
+    viewer.addEventListener('pointerup', handlePointerUp);
+    viewer.addEventListener('pointerleave', handlePointerUp);
 
     loadGraph();
   </script>
